@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-
+// run by gcc main.c && gcc  -o main main.c && main 3 200 < input1.txt
 void init_cluster_values(float** dot_list,float** cluster_list, int k, int d)
 {
     for(int i = 0; i < k; i++)
@@ -100,12 +100,13 @@ int main(int argc, char* argv[]) {
 
     scanf("%s", line);
     int d = count_dim(line)+1;
-    int n=k;
+    int n=500;
    ;
-    // initialize dot list and cluster list
-    float** dot_list = (float **)malloc(k *sizeof(float*));
+    // initialize dot list.size=n and cluster list.size = k
+    float** dot_list = (float **)malloc(n *sizeof(float*));
+    init_dots_list(dot_list,0,n,d);
+
     float** cluster_list = (float **)malloc(k *sizeof(float*));
-    init_dots_list(dot_list,0,k,d);
     init_dots_list(cluster_list,0,k,d);
 
 
@@ -145,6 +146,13 @@ int main(int argc, char* argv[]) {
     init_cluster_values(dot_list,cluster_list,k,d);
     print_matrix(cluster_list,k,d);
 
+
+    for(int i = 0; i < count; i++){
+        free(dot_list[i]);
+        if (i<k)
+            free(cluster_list[i]);
+        }
+    free(dot_list);free(cluster_list);
 
 
 
