@@ -21,7 +21,6 @@ void init_dots_list(float** dot_list, int start,int end,int d){
 
 
 }
-
 float find_distance(float *dot, float *center, int d){
     float dis = 0;
     for (int i = 0; i < d; i++)
@@ -29,37 +28,35 @@ float find_distance(float *dot, float *center, int d){
     return  dis;
 
 }
-
-int get_index_of_closest_cluster(float* dot, float** cluster_list, int d, int k ) {
+int get_index_of_closest_cluster(float* dot, float** cluster_list, int d, int k )
+    {
     int j = 0;
     float min_dis = find_distance(dot, cluster_list[0], d);
     float tmp_dis;
-    for (int i = 1; i < d; i++) {
+    for (int i = 1; i < k; i++)
+    {
         tmp_dis = find_distance(dot, cluster_list[i], d);
-        if (tmp_dis >= min_dis) {
+        if (tmp_dis <= min_dis)
+        {
             min_dis = tmp_dis;
             j = i;
         }
     }
     return j;
 }
-
 void update_cluster_center(float* dot, float * center,int cluster_size,int d,int sign) {
     if (cluster_size+sign==0)
-        printf("error");
-    float temp[d];
+        printf("error \n ");
+    float center_temp[d];
     for (int i = 0; i < d; i++)
-        temp[i] = (center[i] * (cluster_size));
+        center_temp[i] = (center[i] * (cluster_size));
+
     for (int i = 0; i < d; i++){
-        temp[i] += (dot[i]*sign);
-        center[i] = temp[i] / (cluster_size+sign);
+        center_temp[i] += (dot[i]*sign);
+        center[i] = center_temp[i] / (cluster_size+sign);
 
         }
 }
-
-
-
-
 float *string_to_floats(char line[],float arr[],int d )
 {
     int i = 0;
@@ -100,10 +97,11 @@ void print_Arr_int(int* arr, int d) {
     }
     printf("],\n ");
 }
+
 void print_Arr(float* arr, int d) {
     printf("[");
     for (int i = 0; i < d; i++) {
-        printf("%0.2f,", arr[i]);
+        printf("%0.4f,", arr[i]);
 
     }
     printf("],\n ");
@@ -113,14 +111,11 @@ void print_matrix(float** mat,int n,int d){
     printf("[");
     for (int i = 0; i < n; i++) {
         print_Arr(mat[i],d);
-
-
     }
     printf("]");
     printf("\n========================\n");
 
 }
-
 int main(int argc, char* argv[]) {
     int k, max_iter=200;
     char line[256];
@@ -133,25 +128,20 @@ int main(int argc, char* argv[]) {
         printf("k = %d \n",k);
         printf("max_iter= %d \n",max_iter);
     }
+
     int count = 0;
-
-
 
     scanf("%s", line);
     int d = count_dim(line) + 1;
     int n = 500;
-   ;
     // initialize dot list.size=n and cluster list.size = k
     float** dot_list = (float **)malloc(n *sizeof(float*));
     init_dots_list(dot_list, 0, n, d);
-
     float** cluster_list = (float **)malloc(k *sizeof(float*));
     init_dots_list(cluster_list, 0, k, d);
 
-
-
-
      //load dots into list
+
     do{
         string_to_floats(line, dot_list[count], d);
         count++;
@@ -179,19 +169,12 @@ int main(int argc, char* argv[]) {
 
     }
 
-
-
-
   //  print_matrix(dot_list, count, d);
-
     init_cluster_values(dot_list, cluster_list, k, d);
-
 
     int is_a_cluster_changed=1;
     int count_iter = 0;
 
-    float* cluster;
-    float * dot;
     while (count_iter<max_iter && is_a_cluster_changed) {
         is_a_cluster_changed = 0;
         count_iter++;
@@ -199,23 +182,17 @@ int main(int argc, char* argv[]) {
             move_dot_to[i] = get_index_of_closest_cluster(dot_list[i], cluster_list, d, k);
 
         for (int j = 0; j < n; j++) {// update clusters
-
             if (dot_at[j] == -1) {
                 dot_at[j] = move_dot_to[j];
-                update_cluster_center(dot_list[j], cluster_list[move_dot_to[j]], cluster_size[move_dot_to[j]], d,
-                                      1); //add dot to center
-                //   printf("updated dot %i, into cluster %d\n ",i, move_dot_to[i]);
-                // print_Arr(cluster_list[move_dot_to[i]],d);
+                update_cluster_center(dot_list[j], cluster_list[move_dot_to[j]], cluster_size[move_dot_to[j]], d, 1); //add dot to center
                 cluster_size[move_dot_to[j]]++;
                 is_a_cluster_changed = 1;
             } else {
                 if (dot_at[j] != move_dot_to[j]) {
-
                     update_cluster_center(dot_list[j], cluster_list[dot_at[j]], cluster_size[dot_at[j]], d,-1); //remove dot from center
                     update_cluster_center(dot_list[j], cluster_list[move_dot_to[j]], cluster_size[move_dot_to[j]], d,1); //add dot to center
                     cluster_size[dot_at[j]]--;
                     cluster_size[move_dot_to[j]]++;
-                    //  printf("move dot %i, from cluster %d to cluster %d \n",i,dot_at[i] ,move_dot_to[i]);
                     dot_at[j] = move_dot_to[j];
                     is_a_cluster_changed = 1;
                 }
@@ -224,10 +201,6 @@ int main(int argc, char* argv[]) {
     }
 
     print_matrix(cluster_list, k, d);
-
-
-
-
 
     /// free memory
     for(int i = 0; i < count; i++){
