@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 // run by gcc main.c && gcc  -o main main.c && main 3 200 < input1.txt
 
-void init_cluster_values(float** dot_list,float** cluster_list, int k, int d)
+void init_cluster_values(double** dot_list,double** cluster_list, int k, int d)
 {
     for(int i = 0; i < k; i++)
     {
@@ -15,24 +16,26 @@ void init_cluster_values(float** dot_list,float** cluster_list, int k, int d)
     }
 
 }
-void init_dots_list(float** dot_list, int start,int end,int d){
-    for(int i = start; i < end; i++)
-        dot_list[i] = (float*) calloc(d,sizeof(float));
-
+void init_dots_list(double** dot_list, int start,int end,int d){
+    for (int i = start; i < end; i++) {
+        dot_list[i] = (double*)calloc(d, sizeof(double));
+        assert(dot_list[i] != NULL);
+    }
+        
 
 }
-float find_distance(float *dot, float *center, int d){
-    float dis = 0;
+double find_distance(double *dot, double *center, int d){
+    double dis = 0;
     for (int i = 0; i < d; i++)
         dis += (dot[i] - center[i]) * (dot[i] - center[i]);
     return  dis;
 
 }
-int get_index_of_closest_cluster(float* dot, float** cluster_list, int d, int k )
+int get_index_of_closest_cluster(double* dot, double** cluster_list, int d, int k )
     {
     int j = 0;
-    float min_dis = find_distance(dot, cluster_list[0], d);
-    float tmp_dis;
+    double min_dis = find_distance(dot, cluster_list[0], d);
+    double tmp_dis;
     for (int i = 1; i < k; i++)
     {
         tmp_dis = find_distance(dot, cluster_list[i], d);
@@ -44,10 +47,10 @@ int get_index_of_closest_cluster(float* dot, float** cluster_list, int d, int k 
     }
     return j;
 }
-void update_cluster_center(float* dot, float * center,int cluster_size,int d,int sign) {
+void update_cluster_center(double* dot, double * center,int cluster_size,int d,int sign) {
     if (cluster_size+sign==0)
         printf("error \n ");
-    float center_temp[d];
+    double center_temp[d];
     for (int i = 0; i < d; i++)
         center_temp[i] = (center[i] * (cluster_size));
 
@@ -57,21 +60,19 @@ void update_cluster_center(float* dot, float * center,int cluster_size,int d,int
 
         }
 }
-float *string_to_floats(char line[],float arr[],int d )
+void string_to_doubles(char *line,double arr[],int d )
 {
     int i = 0;
     char* ptr = strtok(line, ",");
     while(ptr != NULL)
-    {
-
+    {       
         arr[i] = atof(ptr);
         ptr = 	strtok(NULL, ",");
         i++;
 
-
-    }
-   // print_Arr(arr, d);
-    return arr;
+    }   
+    
+    
 }
 int count_dim(char line[])
 {
@@ -90,72 +91,104 @@ int count_dim(char line[])
     return count;
 }
 void print_Arr_int(int* arr, int d) {
-    printf("[");
     for (int i = 0; i < d; i++) {
         printf("%d,", arr[i]);
 
     }
-    printf("],\n ");
+    printf(",\n ");
 }
 
-void print_Arr(float* arr, int d) {
-    printf("[");
+void print_Arr(double* arr, int d) { 
     for (int i = 0; i < d; i++) {
-        printf("%0.4f,", arr[i]);
+        printf("%.4f",arr[i]);
+        if (i < d - 1) {
+            printf("%c", ',');
+        }
 
     }
-    printf("],\n ");
+    
+    printf("\n");
 }
-void print_matrix(float** mat,int n,int d){
-    printf("\n========================\n");
-    printf("[");
+void print_matrix(double** mat,int n,int d){
     for (int i = 0; i < n; i++) {
         print_Arr(mat[i],d);
     }
-    printf("]");
-    printf("\n========================\n");
 
 }
+
+int dynamic_scan(char *str, int size) {
+    //The size is extended by the input with the value of the provisional
+    char ch=getchar();
+    int len = 0;
+    int doubled_size = size;
+    while (ch != '\n' && ch != EOF) {
+        str[len] = ch;
+        len++;
+        if (len == (doubled_size)) {
+            doubled_size = doubled_size*2;
+            str = (char *) realloc ( str, (sizeof(char))* doubled_size);
+            assert(str!=NULL);
+        }
+        ch = getchar();
+        
+
+    }
+    if (len > size) {
+        
+        str = (char*)realloc(str, sizeof(ch) * (len));
+        assert(str != NULL);
+        }
+    return len+10;
+}
 int main(int argc, char* argv[]) {
-    int k, max_iter=200;
-    char line[256];
+    int k, max_iter = 200;
+    
     if (1)
-    {
+    {   
         if (argc > 1)
             k = atoi(argv[1]);
         if (argc > 2)
-            max_iter= atoi(argv[2]);
-        printf("k = %d \n",k);
-        printf("max_iter= %d \n",max_iter);
+            max_iter = atoi(argv[2]);
     }
-
+    assert(k>0 && max_iter>0);
+    int line_length = 17;
+    
+    char *line = malloc(line_length*sizeof(char));
+    assert(line != NULL);
+    
+       line_length = dynamic_scan(line, line_length);
+       int max_line_length = line_length;
     int count = 0;
-
-    scanf("%s", line);
     int d = count_dim(line) + 1;
     int n = 500;
     // initialize dot list.size=n and cluster list.size = k
-    float** dot_list = (float **)malloc(n *sizeof(float*));
+    double** dot_list = (double **)malloc(n *sizeof(double*));
+    assert(dot_list != NULL);
     init_dots_list(dot_list, 0, n, d);
-    float** cluster_list = (float **)malloc(k *sizeof(float*));
+    double** cluster_list = (double **)malloc(k *sizeof(double*));
+    assert(dot_list != NULL);
     init_dots_list(cluster_list, 0, k, d);
-
      //load dots into list
-
     do{
-        string_to_floats(line, dot_list[count], d);
+        string_to_doubles(line, dot_list[count], d);
+        memset(line, 0, max_line_length);
         count++;
-        if (count==n){
-            n =n * 2;
-            dot_list = (float **) realloc(dot_list, n * sizeof(dot_list[0]));
-            init_dots_list(dot_list,n/2, n, d);
-        } // double the size of array if needed
-    } while ((scanf("%s", line)) == 1);
-
-    printf("Summery:Got %d dots, each dot have %d values \n", count, d);
-    dot_list = (float **)realloc(dot_list,count *sizeof(float *));
+        if (count == n) {
+            n = n * 2;
+            dot_list = (double**)realloc(dot_list, n * sizeof(dot_list[0]));
+            assert(dot_list!=NULL);
+            init_dots_list(dot_list, n / 2, n, d);
+            
+        }
+        line_length = dynamic_scan(line, max_line_length);
+        if (line_length > max_line_length) {
+            max_line_length = line_length;
+        }
+    } while ( line_length> 10);
+        free(line);
+    dot_list = (double**)realloc(dot_list, count * sizeof(double*));
+    assert(dot_list != NULL);
     n = count;
-    // initialize loctions ans cluster's size
     int dot_at[n];
     int move_dot_to[n];
     int cluster_size[k];
@@ -169,7 +202,6 @@ int main(int argc, char* argv[]) {
 
     }
 
-  //  print_matrix(dot_list, count, d);
     init_cluster_values(dot_list, cluster_list, k, d);
 
     int is_a_cluster_changed=1;
@@ -208,8 +240,8 @@ int main(int argc, char* argv[]) {
         if (i<k)
             free(cluster_list[i]);
         }
-    free(dot_list);free(cluster_list);
-
-
-
+    free(dot_list);
+    free(cluster_list);
+    
 }
+
