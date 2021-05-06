@@ -7,9 +7,11 @@
 
 void init_cluster_values(double** dot_list,double** cluster_list, int k, int d)
 {
-    for(int i = 0; i < k; i++)
+    int i,j;
+
+    for(i = 0; i < k; i++)
     {
-        for(int j = 0; j < d; j++)
+        for(j = 0; j < d; j++)
         {
             cluster_list[i][j] = dot_list[i][j];
         }
@@ -17,7 +19,8 @@ void init_cluster_values(double** dot_list,double** cluster_list, int k, int d)
 
 }
 void init_dots_list(double** dot_list, int start,int end,int d){
-    for (int i = start; i < end; i++) {
+    int i;
+    for (i = start; i < end; i++) {
         dot_list[i] = (double*)calloc(d, sizeof(double));
         assert(dot_list[i] != NULL);
     }
@@ -26,7 +29,8 @@ void init_dots_list(double** dot_list, int start,int end,int d){
 }
 double find_distance(double *dot, double *center, int d){
     double dis = 0;
-    for (int i = 0; i < d; i++)
+    int i;
+    for ( i = 0; i < d; i++)
         dis += (dot[i] - center[i]) * (dot[i] - center[i]);
     return  dis;
 
@@ -36,7 +40,8 @@ int get_index_of_closest_cluster(double* dot, double** cluster_list, int d, int 
     int j = 0;
     double min_dis = find_distance(dot, cluster_list[0], d);
     double tmp_dis;
-    for (int i = 1; i < k; i++)
+    int i;
+    for (i = 1; i < k; i++)
     {
         tmp_dis = find_distance(dot, cluster_list[i], d);
         if (tmp_dis <= min_dis)
@@ -51,10 +56,11 @@ void update_cluster_center(double* dot, double * center,int cluster_size,int d,i
     if (cluster_size+sign==0)
         printf("error \n ");
     double center_temp[d];
-    for (int i = 0; i < d; i++)
+    int i;
+    for (i = 0; i < d; i++)
         center_temp[i] = (center[i] * (cluster_size));
 
-    for (int i = 0; i < d; i++){
+    for (i = 0; i < d; i++){
         center_temp[i] += (dot[i]*sign);
         center[i] = center_temp[i] / (cluster_size+sign);
 
@@ -81,7 +87,7 @@ int count_dim(char line[])
     int i,count=0;
 
 
-    for(i=0;line[i];i++)
+    for(i=0;i<strlen(line);i++)
     {
         if(line[i]==c)
         {
@@ -91,7 +97,8 @@ int count_dim(char line[])
     return count;
 }
 void print_Arr_int(int* arr, int d) {
-    for (int i = 0; i < d; i++) {
+    int i;
+    for (i = 0; i < d; i++) {
         printf("%d,", arr[i]);
 
     }
@@ -99,7 +106,8 @@ void print_Arr_int(int* arr, int d) {
 }
 
 void print_Arr(double* arr, int d) { 
-    for (int i = 0; i < d; i++) {
+    int i;
+    for (i = 0; i < d; i++) {
         printf("%.4f",arr[i]);
         if (i < d - 1) {
             printf("%c", ',');
@@ -110,7 +118,8 @@ void print_Arr(double* arr, int d) {
     printf("\n");
 }
 void print_matrix(double** mat,int n,int d){
-    for (int i = 0; i < n; i++) {
+    int i;
+    for (i = 0; i < n; i++) {
         print_Arr(mat[i],d);
     }
 
@@ -192,11 +201,12 @@ int main(int argc, char* argv[]) {
     int dot_at[n];
     int move_dot_to[n];
     int cluster_size[k];
-    for(int i = 0; i < n; i++){
+    int i;
+    for(i = 0; i < n; i++){
         dot_at[i]=-1;
         move_dot_to[i] = 0 ;
     }
-    for(int i = 0; i < k; i++) {
+    for(i = 0; i < k; i++) {
         dot_at[i] = i;
         cluster_size[i] = 1;
 
@@ -210,10 +220,11 @@ int main(int argc, char* argv[]) {
     while (count_iter<max_iter && is_a_cluster_changed) {
         is_a_cluster_changed = 0;
         count_iter++;
-        for (int i = 0; i < n; i++) //find nearest clusters
+        int i,j;
+        for ( i = 0; i < n; i++) //find nearest clusters
             move_dot_to[i] = get_index_of_closest_cluster(dot_list[i], cluster_list, d, k);
 
-        for (int j = 0; j < n; j++) {// update clusters
+        for (j = 0; j < n; j++) {// update clusters
             if (dot_at[j] == -1) {
                 dot_at[j] = move_dot_to[j];
                 update_cluster_center(dot_list[j], cluster_list[move_dot_to[j]], cluster_size[move_dot_to[j]], d, 1); //add dot to center
@@ -235,7 +246,8 @@ int main(int argc, char* argv[]) {
     print_matrix(cluster_list, k, d);
 
     /// free memory
-    for(int i = 0; i < count; i++){
+    
+    for(i = 0; i < count; i++){
         free(dot_list[i]);
         if (i<k)
             free(cluster_list[i]);
