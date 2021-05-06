@@ -3,7 +3,7 @@
 #include <string.h>
 #include <assert.h>
 
-// run by gcc main.c && gcc  -o main main.c && main 3 200 < input1.txt
+/* run by gcc main.c && gcc  -o main main.c && main 3 200 < input1.txt */
 
 void init_cluster_values(double** dot_list,double** cluster_list, int k, int d)
 {
@@ -59,8 +59,9 @@ int get_index_of_closest_cluster(double* dot, double** cluster_list, int d, int 
 void update_cluster_center(double* dot, double * center,int cluster_size,int d,int sign) {
     if (cluster_size+sign==0)
         printf("error \n ");
-    double center_temp[d];
+    double * center_temp;
     int i;
+    center_temp  = (double *) calloc(d,sizeof(double ));
     for (i = 0; i < d; i++)
         center_temp[i] = (center[i] * (cluster_size));
 
@@ -136,7 +137,7 @@ void print_matrix(double** mat,int n,int d){
 }
 
 int dynamic_scan(char *str, int size) {
-    //The size is extended by the input with the value of the provisional
+    /*The size is extended by the input with the value of the provisional */
     int len;
     char ch;
     int doubled_size;
@@ -169,6 +170,9 @@ int main(int argc, char* argv[]) {
     char *line;
     double **dot_list;
     double **cluster_list;
+    int *dot_at;
+    int *move_dot_to;
+    int *cluster_size;
 
     if (1) {
         if (argc > 1)
@@ -189,7 +193,7 @@ int main(int argc, char* argv[]) {
     d = count_dim(line) + 1;
     n = 500;
 
-    // initialize dot list.size=n and cluster list.size = k
+    /* initialize dot list.size=n and cluster list.size = k */
     dot_list = (double **) malloc(n * sizeof(double *));
     assert(dot_list != NULL);
     init_dots_list(dot_list, 0, n, d);
@@ -197,7 +201,7 @@ int main(int argc, char* argv[]) {
     cluster_list = (double **) malloc(k * sizeof(double *));
     assert(dot_list != NULL);
     init_dots_list(cluster_list, 0, k, d);
-    //load dots into list
+    /*load dots into list */
     do {
         string_to_doubles(line, dot_list[count]);
         memset(line, 0, max_line_length);
@@ -219,9 +223,10 @@ int main(int argc, char* argv[]) {
     assert(dot_list != NULL);
     n = count;
 
-    int dot_at[n];
-    int move_dot_to[n];
-    int cluster_size[k];
+    dot_at = (int*) calloc(n,sizeof (int));
+    move_dot_to = (int*) calloc(n,sizeof (int));
+    cluster_size = (int*) calloc(k,sizeof (int));
+
 
     for (i = 0; i < n; i++) {
         dot_at[i] = -1;
@@ -242,22 +247,22 @@ int main(int argc, char* argv[]) {
         is_a_cluster_changed = 0;
         count_iter++;
         int i, j;
-        for (i = 0; i < n; i++) //find nearest clusters
+        for (i = 0; i < n; i++) /*find nearest clusters */
             move_dot_to[i] = get_index_of_closest_cluster(dot_list[i], cluster_list, d, k);
 
-        for (j = 0; j < n; j++) {// update clusters
+        for (j = 0; j < n; j++) {/* update clusters*/
             if (dot_at[j] == -1) {
                 dot_at[j] = move_dot_to[j];
                 update_cluster_center(dot_list[j], cluster_list[move_dot_to[j]], cluster_size[move_dot_to[j]], d,
-                                      1); //add dot to center
+                                      1); /*add dot to center*/
                 cluster_size[move_dot_to[j]]++;
                 is_a_cluster_changed = 1;
             } else {
                 if (dot_at[j] != move_dot_to[j]) {
                     update_cluster_center(dot_list[j], cluster_list[dot_at[j]], cluster_size[dot_at[j]], d,
-                                          -1); //remove dot from center
+                                          -1); /*remove dot from center */
                     update_cluster_center(dot_list[j], cluster_list[move_dot_to[j]], cluster_size[move_dot_to[j]], d,
-                                          1); //add dot to center
+                                          1); /*add dot to center */
                     cluster_size[dot_at[j]]--;
                     cluster_size[move_dot_to[j]]++;
                     dot_at[j] = move_dot_to[j];
@@ -269,7 +274,7 @@ int main(int argc, char* argv[]) {
 
     print_matrix(cluster_list, k, d);
 
-    /// free memory
+    /*/ free memory */
 
     for (i = 0; i < count; i++) {
         free(dot_list[i]);
